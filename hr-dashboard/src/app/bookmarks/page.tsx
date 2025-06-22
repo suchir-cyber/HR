@@ -2,6 +2,7 @@
 import { useBookmarksStore } from '../../store/bookmarkStore';
 import RatingStars from '../../components/RatingStars';
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Bookmarks() {
   const { bookmarks, removeBookmark } = useBookmarksStore();
@@ -26,22 +27,31 @@ export default function Bookmarks() {
       ) : (
         <>
           <div className="row">
-            {currentBookmarks.map(user => (
-              <div className="col-md-4 mb-3" key={user.id}>
-                <div className="card h-100 shadow-sm">
-                  <div className="card-body">
-                    <h5>{user.firstName} {user.lastName}</h5>
-                    <p>{user.email}</p>
-                    <RatingStars rating={user.rating} />
-                    <div className="mt-2 d-flex gap-2">
-                      <button className="btn btn-success btn-sm" onClick={() => handlePromote(user)}>Promote</button>
-                      <button className="btn btn-primary btn-sm" onClick={() => handleAssign(user)}>Assign</button>
-                      <button className="btn btn-danger btn-sm" onClick={() => removeBookmark(user.id)}>Remove</button>
+            <AnimatePresence mode="wait">
+              {currentBookmarks.map(user => (
+                <motion.div
+                  key={user.id}
+                  className="col-md-4 mb-3"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="card h-100 shadow-sm">
+                    <div className="card-body">
+                      <h5>{user.firstName} {user.lastName}</h5>
+                      <p>{user.email}</p>
+                      <RatingStars rating={user.rating} />
+                      <div className="mt-2 d-flex gap-2">
+                        <button className="btn btn-success btn-sm" onClick={() => handlePromote(user)}>Promote</button>
+                        <button className="btn btn-primary btn-sm" onClick={() => handleAssign(user)}>Assign</button>
+                        <button className="btn btn-danger btn-sm" onClick={() => removeBookmark(user.id)}>Remove</button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
 
           <nav>
