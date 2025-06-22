@@ -1,28 +1,38 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import RatingStars from '../../../components/RatingStars';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import UserCard from '../../../components/UserCard';
+import { useEmployeeStore } from '../../../store/employeeStore';
 
-export default function UserDetails() {
-  const { id } = useParams();
-  const [user, setUser] = useState(null);
+export default function HomePage() {
+  const router = useRouter();
+  const employees = useEmployeeStore((state) => state.employees);
+  const setEmployees = useEmployeeStore((state) => state.setEmployees);
 
   useEffect(() => {
-    fetch(`https://dummyjson.com/users/${id}`)
+    fetch('https://dummyjson.com/users?limit=20')
       .then(res => res.json())
-      .then(data => setUser(data));
-  }, [id]);
+      .then(data => {
+        setEmployees(data.users);
+      });
+  }, [setEmployees]);
 
-  if (!user) return <p>Loading...</p>;
+  const handleView = (id) => router.push(`/employee/${id}`);
 
   return (
     <div className="container py-4">
-      <h2>{user.firstName} {user.lastName}</h2>
-      <p>Email: {user.email}</p>
-      <p>Phone: {user.phone}</p>
-      <p>Bio: Enthusiastic and detail-oriented team member</p>
-      <p>Department: <span className="badge bg-secondary">{user.company?.department || 'N/A'}</span></p>
-      <RatingStars rating={Math.round((user.age % 5) + 1)} />
+      <h2 className="mb-4">🏠 Employee Directory</h2>
+      {!employees.length ? (
+        <p>Loading...</p>
+      ) : (
+        <div className="row">
+          {employees.map(user => (
+            <div className="col-md-4 mb-3" key={user.id}>
+              <UserCard user={user} onView={handleView} />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

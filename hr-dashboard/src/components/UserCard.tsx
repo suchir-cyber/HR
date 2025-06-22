@@ -2,7 +2,7 @@
 import { useBookmarksStore } from '../store/bookmarkStore';
 import RatingStars from './RatingStars';
 
-export default function UserCard({ user, onView }) {
+export default function UserCard({ user, onView, onPromote }) {
   const addBookmark = useBookmarksStore(state => state.addBookmark);
   const bookmarks = useBookmarksStore(state => state.bookmarks);
   const isBookmarked = bookmarks.some(u => u.id === user.id);
@@ -25,6 +25,12 @@ export default function UserCard({ user, onView }) {
             disabled={isBookmarked}
           >
             {isBookmarked ? 'Bookmarked' : 'Bookmark'}
+          </button>
+          <button
+            onClick={() => onPromote(user)}
+            className="btn btn-outline-success btn-sm"
+          >
+          Promote
           </button>
         </div>
       </div>
