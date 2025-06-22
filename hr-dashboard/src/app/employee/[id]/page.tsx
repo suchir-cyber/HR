@@ -1,38 +1,56 @@
 'use client';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import UserCard from '../../../components/UserCard';
-import { useEmployeeStore } from '../../../store/employeeStore';
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
+import RatingStars from '../../../components/RatingStars';
 
-export default function HomePage() {
-  const router = useRouter();
-  const employees = useEmployeeStore((state) => state.employees);
-  const setEmployees = useEmployeeStore((state) => state.setEmployees);
+export default function UserDetailsPage() {
+  const { id } = useParams();
+  const [user, setUser] = useState(null);
+  const [history, setHistory] = useState([]);
 
   useEffect(() => {
-    fetch('https://dummyjson.com/users?limit=20')
+    fetch(`https://dummyjson.com/users/${id}`)
       .then(res => res.json())
       .then(data => {
-        setEmployees(data.users);
-      });
-  }, [setEmployees]);
+        const enriched = {
+          ...data,
+          department: data.company?.department || 'N/A',
+          rating: Math.floor((data.age % 5) + 1),
+        };
+        setUser(enriched);
 
-  const handleView = (id) => router.push(`/employee/${id}`);
+        // Generate mock performance history
+        const mockHistory = Array.from({ length: 5 }, (_, i) => ({
+          year: 2023 - i,
+          rating: Math.floor(Math.random() * 5) + 1,
+        }));
+        setHistory(mockHistory);
+      });
+  }, [id]);
+
+  if (!user) return <p>Loading...</p>;
 
   return (
     <div className="container py-4">
-      <h2 className="mb-4">🏠 Employee Directory</h2>
-      {!employees.length ? (
-        <p>Loading...</p>
-      ) : (
-        <div className="row">
-          {employees.map(user => (
-            <div className="col-md-4 mb-3" key={user.id}>
-              <UserCard user={user} onView={handleView} />
-            </div>
+      <h2>{user.firstName} {user.lastName}</h2>
+      <p>Email: {user.email}</p>
+      <p>Phone: {user.phone}</p>
+      <p>Address: {user.address?.address}, {user.address?.city}</p>
+      <p>Bio: Energetic team player passionate about tech & innovation</p>
+      <p>Department: <span className="badge bg-secondary">{user.department}</span></p>
+      <RatingStars rating={user.rating} />
+
+      <div className="mt-4">
+        <h5>📈 Past Performance History</h5>
+        <ul className="list-group">
+          {history.map((entry, index) => (
+            <li className="list-group-item d-flex justify-content-between align-items-center" key={index}>
+              {entry.year}
+              <span className="badge bg-info">{entry.rating} ⭐</span>
+            </li>
           ))}
-        </div>
-      )}
+        </ul>
+      </div>
     </div>
   );
 }
