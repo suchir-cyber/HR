@@ -11,6 +11,8 @@ export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartments, setSelectedDepartments] = useState([]);
   const [selectedRatings, setSelectedRatings] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', department: '', age: '', rating: 3 });
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem('isAuthenticated');
@@ -55,9 +57,29 @@ export default function HomePage() {
   const uniqueDepartments = [...new Set(users.map(user => user.department))];
   const uniqueRatings = ['1', '2', '3', '4', '5'];
 
+  const handleCreateUser = (e) => {
+    e.preventDefault();
+    if (!formData.firstName || !formData.email || !formData.department) {
+      alert('Please fill all required fields');
+      return;
+    }
+    const newUser = {
+      id: Date.now(),
+      ...formData,
+      rating: parseInt(formData.rating),
+    };
+    const updatedUsers = [newUser, ...users];
+    setUsers(updatedUsers);
+    setFilteredUsers(updatedUsers);
+    setShowModal(false);
+  };
+
   return (
     <div className="container py-4">
-      <h2 className="mb-4">🏠 Employee Directory</h2>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>🏠 Employee Directory</h2>
+        <button className="btn btn-success" onClick={() => setShowModal(true)}>+ Create User</button>
+      </div>
 
       <div className="row mb-4">
         <div className="col-md-4">
@@ -108,6 +130,35 @@ export default function HomePage() {
               <UserCard user={user} onView={handleView} onPromote={handlePromote} />
             </div>
           ))}
+        </div>
+      )}
+
+      {showModal && (
+        <div className="modal show d-block" tabIndex="-1">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <form onSubmit={handleCreateUser}>
+                <div className="modal-header">
+                  <h5 className="modal-title">Create New Employee</h5>
+                  <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+                </div>
+                <div className="modal-body">
+                  <input className="form-control mb-2" placeholder="First Name" required value={formData.firstName} onChange={e => setFormData({ ...formData, firstName: e.target.value })} />
+                  <input className="form-control mb-2" placeholder="Last Name" value={formData.lastName} onChange={e => setFormData({ ...formData, lastName: e.target.value })} />
+                  <input className="form-control mb-2" placeholder="Email" required value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+                  <input className="form-control mb-2" placeholder="Department" required value={formData.department} onChange={e => setFormData({ ...formData, department: e.target.value })} />
+                  <input type="number" className="form-control mb-2" placeholder="Age" value={formData.age} onChange={e => setFormData({ ...formData, age: e.target.value })} />
+                  <select className="form-select" value={formData.rating} onChange={e => setFormData({ ...formData, rating: e.target.value })}>
+                    {[1,2,3,4,5].map(n => <option key={n} value={n}>{n} Stars</option>)}
+                  </select>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary">Create</button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       )}
     </div>
