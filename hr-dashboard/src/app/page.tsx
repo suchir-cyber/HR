@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import UserCard from '../components/UserCard';
+import { useEmployeeStore } from '../store/employeeStore';
 
 export default function HomePage() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartments, setSelectedDepartments] = useState([]);
   const [selectedRatings, setSelectedRatings] = useState([]);
+  const { employees, setEmployees } = useEmployeeStore();
 
   useEffect(() => {
     fetch('https://dummyjson.com/users?limit=20')
@@ -21,14 +23,14 @@ export default function HomePage() {
           department: user.company?.department || 'N/A',
           rating: Math.floor((user.age % 5) + 1),
         }));
-        setUsers(enrichedUsers);
+        setEmployees(enrichedUsers);
         setFilteredUsers(enrichedUsers);
         setLoading(false);
       });
   }, []);
 
   useEffect(() => {
-    let filtered = users.filter(user => {
+    let filtered = employees.filter(user => {
       const matchesSearch = (
         user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
