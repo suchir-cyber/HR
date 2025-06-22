@@ -13,6 +13,8 @@ export default function HomePage() {
   const [selectedRatings, setSelectedRatings] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', department: '', age: '', rating: 3 });
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 12;
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem('isAuthenticated');
@@ -49,6 +51,7 @@ export default function HomePage() {
       return matchesSearch && matchesDepartment && matchesRating;
     });
     setFilteredUsers(filtered);
+    setCurrentPage(1);
   }, [searchTerm, selectedDepartments, selectedRatings, users]);
 
   const handleView = (id) => router.push(`/employee/${id}`);
@@ -73,6 +76,13 @@ export default function HomePage() {
     setFilteredUsers(updatedUsers);
     setShowModal(false);
   };
+
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div className="container py-4">
@@ -124,13 +134,27 @@ export default function HomePage() {
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <div className="row">
-          {filteredUsers.map(user => (
-            <div className="col-md-4 mb-3" key={user.id}>
-              <UserCard user={user} onView={handleView} onPromote={handlePromote} />
-            </div>
-          ))}
-        </div>
+        <>
+          <div className="row">
+            {currentUsers.map(user => (
+              <div className="col-md-4 mb-3" key={user.id}>
+                <UserCard user={user} onView={handleView} onPromote={handlePromote} />
+              </div>
+            ))}
+          </div>
+
+          <nav>
+            <ul className="pagination justify-content-center">
+              {[...Array(totalPages).keys()].map(page => (
+                <li key={page} className={`page-item ${currentPage === page + 1 ? 'active' : ''}`}>
+                  <button onClick={() => paginate(page + 1)} className="page-link">
+                    {page + 1}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </>
       )}
 
       {showModal && (
