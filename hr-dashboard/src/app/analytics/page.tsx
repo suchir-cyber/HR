@@ -1,3 +1,4 @@
+'use client';
 import { useEffect, useState } from 'react';
 import { Bar, Line } from 'react-chartjs-2';
 import {
@@ -6,44 +7,30 @@ import {
   CategoryScale,
   LinearScale,
   PointElement,
-  LineElement,
-  Tooltip,
-  Legend,
-  Title,
+  LineElement
 } from 'chart.js';
-import { useEmployeeStore } from '../store/employeeStore'; 
+import { useBookmarksStore } from '../../store/bookmarkStore';
 
-ChartJS.register(
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend,
-  Title
-);
+ChartJS.register(BarElement, CategoryScale, LinearScale, PointElement, LineElement);
 
 export default function Analytics() {
-  const { employees } = useEmployeeStore(); 
+  const { bookmarks } = useBookmarksStore();
   const [departmentStats, setDepartmentStats] = useState({});
 
   useEffect(() => {
     const deptRatings = {};
-    employees.forEach(emp => {
+    bookmarks.forEach(emp => {
       const dept = emp.department;
       if (!deptRatings[dept]) deptRatings[dept] = { total: 0, count: 0 };
       deptRatings[dept].total += emp.rating;
       deptRatings[dept].count++;
     });
-
     const avgRatings = {};
     Object.keys(deptRatings).forEach(dept => {
       avgRatings[dept] = deptRatings[dept].total / deptRatings[dept].count;
     });
-
     setDepartmentStats(avgRatings);
-  }, [employees]);
+  }, [bookmarks]);
 
   const barData = {
     labels: Object.keys(departmentStats),
@@ -52,73 +39,32 @@ export default function Analytics() {
         label: 'Average Rating by Department',
         data: Object.values(departmentStats),
         backgroundColor: 'rgba(54, 162, 235, 0.6)',
-        borderRadius: 5,
-      },
-    ],
-  };
-
-  const barOptions = {
-    responsive: true,
-    plugins: {
-      legend: { position: 'top' },
-      title: {
-        display: true,
-        text: 'Department-wise Average Ratings',
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        max: 5,
-        ticks: {
-          stepSize: 1,
-        },
-      },
-    },
+      }
+    ]
   };
 
   const lineData = {
     labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
     datasets: [
       {
-        label: 'Mocked Bookmark Trends',
-        data: [2, 5, 8, employees.length], 
+        label: 'Bookmark Trends',
+        data: [2, 5, 8, bookmarks.length],
         borderColor: 'rgba(255, 99, 132, 0.6)',
-        borderWidth: 2,
-        tension: 0.3,
-        fill: false,
-        pointBackgroundColor: 'rgba(255, 99, 132, 1)',
-      },
-    ],
-  };
-
-  const lineOptions = {
-    responsive: true,
-    plugins: {
-      legend: { position: 'top' },
-      title: {
-        display: true,
-        text: 'Bookmark Trends Over Time (Mocked)',
-      },
-    },
+        fill: false
+      }
+    ]
   };
 
   return (
     <div className="container py-4">
-      <h2 className="mb-4 text-2xl font-bold">📊 Analytics</h2>
-
-      <div className="mb-8">
-        <h5 className="text-lg mb-2 font-semibold">Department-wise Average Ratings</h5>
-        {Object.keys(departmentStats).length > 0 ? (
-          <Bar data={barData} options={barOptions} />
-        ) : (
-          <p className="text-gray-500">No rating data available.</p>
-        )}
+      <h2>📊 Analytics</h2>
+      <div className="mb-5">
+        <h5>Department-wise Average Ratings</h5>
+        <Bar data={barData} />
       </div>
-
       <div>
-        <h5 className="text-lg mb-2 font-semibold">Bookmark Trends (Mocked)</h5>
-        <Line data={lineData} options={lineOptions} />
+        <h5>Bookmark Trends</h5>
+        <Line data={lineData} />
       </div>
     </div>
   );
