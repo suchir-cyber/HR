@@ -1,5 +1,6 @@
-import RatingStars from './Ratings';
+'use client';
 import { useBookmarksStore } from '../store/bookmarkStore';
+import RatingStars from './RatingStars';
 
 export default function UserCard({ user, onView }) {
   const addBookmark = useBookmarksStore(state => state.addBookmark);
@@ -7,7 +8,7 @@ export default function UserCard({ user, onView }) {
   const isBookmarked = bookmarks.some(u => u.id === user.id);
 
   return (
-    <div className="card h-100 shadow-sm border-{isBookmarked ? 'success' : 'light'}">
+    <div className={`card h-100 shadow-sm ${isBookmarked ? 'border-success' : ''}`}>
       <div className="card-body">
         <h5 className="card-title">{user.firstName} {user.lastName}</h5>
         <h6 className="card-subtitle mb-2 text-muted">{user.email}</h6>
@@ -25,7 +26,6 @@ export default function UserCard({ user, onView }) {
           >
             {isBookmarked ? 'Bookmarked' : 'Bookmark'}
           </button>
-          <button className="btn btn-success btn-sm">Promote</button>
         </div>
       </div>
     </div>
