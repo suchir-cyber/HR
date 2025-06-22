@@ -1,110 +1,43 @@
 'use client';
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import UserCard from '../components/UserCard';
-import { useEmployeeStore } from '../store/employeeStore';
+import { useState } from 'react';
 
-export default function HomePage() {
+export default function LoginPage() {
   const router = useRouter();
-  const [users, setUsers] = useState([]);
-  const [filteredUsers, setFilteredUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDepartments, setSelectedDepartments] = useState([]);
-  const [selectedRatings, setSelectedRatings] = useState([]);
-  const { employees, setEmployees } = useEmployeeStore();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetch('https://dummyjson.com/users?limit=20')
-      .then(res => res.json())
-      .then(data => {
-        const enrichedUsers = data.users.map(user => ({
-          ...user,
-          department: user.company?.department || 'N/A',
-          rating: Math.floor((user.age % 5) + 1),
-        }));
-        setEmployees(enrichedUsers);
-        setFilteredUsers(enrichedUsers);
-        setLoading(false);
-      });
-  }, []);
-
-  useEffect(() => {
-    let filtered = employees.filter(user => {
-      const matchesSearch = (
-        user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.department.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      const matchesDepartment = selectedDepartments.length === 0 || selectedDepartments.includes(user.department);
-      const matchesRating = selectedRatings.length === 0 || selectedRatings.includes(String(user.rating));
-      return matchesSearch && matchesDepartment && matchesRating;
-    });
-    setFilteredUsers(filtered);
-  }, [searchTerm, selectedDepartments, selectedRatings, users]);
-
-  const handleView = (id) => router.push(`/employee/${id}`);
-  const handlePromote = (user) => alert(`Promote ${user.firstName} to project`);
-
-  const uniqueDepartments = [...new Set(users.map(user => user.department))];
-  const uniqueRatings = ['1', '2', '3', '4', '5'];
+  const handleLogin = (e) => {
+    e.preventDefault();
+    // 🔐 Mock credentials check
+    if (email === 'suchir.pandula18@gmail.com' && password === 'suchir123') {
+      localStorage.setItem('isAuthenticated', 'true');
+      router.push('/home');
+    } else {
+      setError('Invalid email or password');
+    }
+  };
 
   return (
-    <div className="container py-4">
-      <h2 className="mb-4">🏠 Employee Directory</h2>
-
-      <div className="row mb-4">
-        <div className="col-md-4">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Search by name, email, or department"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <div className="col-md-4">
-          <select
-            className="form-select"
-            multiple
-            value={selectedDepartments}
-            onChange={(e) =>
-              setSelectedDepartments(Array.from(e.target.selectedOptions, option => option.value))
-            }
-          >
-            {uniqueDepartments.map(dept => (
-              <option key={dept} value={dept}>{dept}</option>
-            ))}
-          </select>
-        </div>
-        <div className="col-md-4">
-          <select
-            className="form-select"
-            multiple
-            value={selectedRatings}
-            onChange={(e) =>
-              setSelectedRatings(Array.from(e.target.selectedOptions, option => option.value))
-            }
-          >
-            {uniqueRatings.map(r => (
-              <option key={r} value={r}>{r} Stars</option>
-            ))}
-          </select>
+    <div className="container py-5">
+      <div className="row justify-content-center">
+        <div className="col-md-6">
+          <h2 className="mb-4">🔐 HR Panel Login</h2>
+          <form onSubmit={handleLogin}>
+            <div className="mb-3">
+              <label>Email</label>
+              <input type="email" className="form-control" value={email} onChange={e => setEmail(e.target.value)} required />
+            </div>
+            <div className="mb-3">
+              <label>Password</label>
+              <input type="password" className="form-control" value={password} onChange={e => setPassword(e.target.value)} required />
+            </div>
+            {error && <div className="alert alert-danger">{error}</div>}
+            <button className="btn btn-primary w-100" type="submit">Login</button>
+          </form>
         </div>
       </div>
-
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <div className="row">
-          {filteredUsers.map(user => (
-            <div className="col-md-4 mb-3" key={user.id}>
-              <UserCard user={user} onView={handleView} onPromote={handlePromote} />
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
