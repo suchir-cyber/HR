@@ -11,7 +11,7 @@ export default function LoginPage() {
   const handleLogin = (e) => {
     e.preventDefault();
     // 🔐 Mock credentials check
-    if (email === 'suchir.pandula18@gmail.com' && password === 'suchir123') {
+    if (email === 'hr@gmail.com' && password === 'hr123') {
       localStorage.setItem('isAuthenticated', 'true');
       router.push('/home');
     } else {
