@@ -4,12 +4,13 @@ import './globals.css';
 import Navbar from '../components/Navbar';
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-
-
+import useInitEmployees from '../hooks/useInitEmployees';
 
 export default function RootLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
+
+  useInitEmployees(); 
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem('isAuthenticated');
